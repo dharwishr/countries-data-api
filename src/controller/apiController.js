@@ -1,47 +1,48 @@
-const fs = require("fs");
-const file = fs.readFileSync('./src/data/countries.json');
-const data = JSON.parse(file)
-const isoCountries = require("i18n-iso-countries");
-
-const fetchSpecificCountry = (request, response) => {
-    var input = request.params.country;
-    let country = data.countries.find(el => el.name.toLowerCase() === input.toLowerCase())
-    country ? response.send(country) : response.status(404).send('Not found')
-}
-
-const fetchBorderingCountries = (request, response) => {
-    var input = request.params.country;
-    let country = data.countries.find(el => el.name.toLowerCase() === input.toLowerCase())
-    if (country) {
-        var borderCountriesName = country.borders.map(item => (isoCountries.getName(item, "en")))
-        var borderCountries = borderCountriesName.map(item => (data.countries.find(el => el.name.toLowerCase() === item.toLowerCase())))
-        response.send(borderCountries)
-    }
-    else{
-        response.status(404).send('Not found')
-    }
-   
-}
+const { count } = require("console");
+var fs = require("fs");
+var file = fs.readFileSync('./src/data/countries.json');
+var data = JSON.parse(file)
+var isoCountries = require("i18n-iso-countries");
 
 const filterByLanguage = (lang) => {
-    var output = data.countries.filter(el => (typeof el.languages !== 'undefined') ? Object.values(el.languages).some(item => (item.toLowerCase() === lang.toLowerCase())) : null)
+    let output = data.countries.filter(el => (typeof el.languages !== 'undefined') ? Object.values(el.languages).some(item => (item.toLowerCase() === lang.toLowerCase())) : null)
     return output
 }
 
-const filterByPopulation = (req, action) => {
+const filterByPopulation = (request, action) => {
     if(action === "gt"){
-        var output = data.countries.filter(el => el.population >= req.query.gt)
+        let output = data.countries.filter(el => el.population >= request.query.gt)
         return output
     }
     if(action === "lt"){
-        var output = data.countries.filter(el => el.population <= req.query.lt)
+        let output = data.countries.filter(el => el.population <= request.query.lt)
         return output
     }
     if(action === "both"){
-        var output = data.countries.filter(el => (el.population >= req.query.gt && el.population <= req.query.lt ))
+        let output = data.countries.filter(el => (el.population >= request.query.gt && el.population <= request.query.lt ))
         return output
     }
 } 
+
+const fetchSpecificCountry = (request, response) => {
+    let country = request.params.country;
+    let countryData = data.countries.find(el => el.name.toLowerCase() === country.toLowerCase())
+    countryData ? response.send(countryData) : response.status(404).send('Country not found')
+}
+
+const fetchBorderingCountries = (request, response) => {
+    let country = request.params.country;
+    let countryData = data.countries.find(el => el.name.toLowerCase() === country.toLowerCase())
+    if (countryData) {
+        let borderCountries = countryData.borders.map(item => (isoCountries.getName(item, "en")))
+        let borderCountriesData = borderCountries.map(item => (data.countries.find(el => el.name.toLowerCase() === item.toLowerCase())))
+        response.send(borderCountriesData)
+    }
+    else{
+        response.status(404).send('Country not found')
+    }
+   
+}
 
 const fetchCountries = (request, response) => {
     if(request.query.lang){
@@ -63,29 +64,31 @@ const fetchCountries = (request, response) => {
 }
 
 const updateData = (request, response) => {
-    const params = request.params.country;
-    if (request.body.subregion){
-        data.countries.forEach((item, index)=>{
-            if (item.name.toLowerCase() === params.toLowerCase() ){
-            data.countries[index].subregion = [...(Array.isArray(data.countries[index].subregion) ? data.countries[index].subregion : [data.countries[index].subregion]), request.body.subregion]
-            console.log(data.countries[index])
-            fs.writeFileSync('./src/data/countries.json', JSON.stringify(data));
-            response.status(200).json({status:"Subregion Updated"})
-            }
-        })
-    }
-    else if(request.body.border){
-        data.countries.forEach((item, index)=>{
-            if (item.name.toLowerCase() === params.toLowerCase() ){
-            data.countries[index].borders = [...(Array.isArray(data.countries[index].borders) ? data.countries[index].borders : [data.countries[index].borders]), request.body.border]
-            console.log(data.countries[index].borders)
-            fs.writeFileSync('./src/data/countries.json', JSON.stringify(data));
-            response.status(200).json({status:"Border Updated"})
-            }
-        })
+    let country = request.params.country;
+    let subregion = request.body.subregion;
+    let border = request.body.border
+    console.log(border)
+    if (subregion || border){
+        if(subregion){
+            data.countries.forEach((item, index)=>{
+                if (item.name.toLowerCase() === country.toLowerCase() ){
+                    data.countries[index].subregion = [...(Array.isArray(data.countries[index].subregion) ? data.countries[index].subregion : [data.countries[index].subregion]), subregion]
+                    fs.writeFileSync('./src/data/countries.json', JSON.stringify(data));
+                }
+            })
+        }
+        if(border){
+            data.countries.forEach((item, index)=>{
+                if (item.name.toLowerCase() === country.toLowerCase() ){
+                    data.countries[index].borders = [...(Array.isArray(data.countries[index].borders) ? data.countries[index].borders : [data.countries[index].borders]), border]
+                    fs.writeFileSync('./src/data/countries.json', JSON.stringify(data));
+                }
+            })
+        }
+        response.status(200).json({status:"Updated"})
     }
     else{
-        response.status(404).send('Not found')
+        response.status(500).send('Something went wrong')
     }
 }
 
