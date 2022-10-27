@@ -1,4 +1,3 @@
-const { count } = require("console");
 var fs = require("fs");
 var file = fs.readFileSync('./src/data/countries.json');
 var data = JSON.parse(file)
@@ -67,7 +66,6 @@ const updateData = (request, response) => {
     let country = request.params.country;
     let subregion = request.body.subregion;
     let border = request.body.border
-    console.log(border)
     if (subregion || border){
         if(subregion){
             data.countries.forEach((item, index)=>{
