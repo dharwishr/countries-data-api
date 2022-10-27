@@ -1,4 +1,4 @@
-const Redis = require('ioredis');
-const redis = new Redis();
+var Redis = require('ioredis');
+var redis = new Redis();
 
 module.exports = redis;
