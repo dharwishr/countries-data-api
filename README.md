@@ -63,14 +63,21 @@
     curl -X POST localhost:3000/countries/india -H 'Content-Type: application/json' -d '{"subregion":"Asia"}'
     ```
 * ### Add border country to specific country
+    ### `POST /countries/country`
+    Body:
     ```
-    # Send POST request to localhost:3000/countries/country
-
-    # Body Example
-
     {
         "border":"value"
     }
     ```
+    Example
+    ```bash
+    curl -X POST localhost:3000/countries/india -H 'Content-Type: application/json' -d '{"border":"USA"}'
+    ```
 
+## How to run API 
+* Install Redis and Start Redis Server
+```bash
+npm install && npm start
+```
 
