@@ -1,15 +1,15 @@
 const fs = require("fs");
 const express = require("express");
 const isoCountries = require("i18n-iso-countries");
-const { apiLogger } = require("./middleware/apiLogger");
-const { apiRateLimiter } = require("./middleware/apiRateLimiter");
+const { apiLogger } = require("./src/middleware/apiLogger");
+const { apiRateLimiter } = require("./src/middleware/apiRateLimiter");
 
 const app = express();
 app.use(express.json());
 app.use(apiLogger());
 app.use(apiRateLimiter());
 
-const file = fs.readFileSync('./data/countries.js');
+const file = fs.readFileSync('./src/data/countries.json');
 const data = JSON.parse(file)
 
 

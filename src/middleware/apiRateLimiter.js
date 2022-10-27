@@ -4,7 +4,7 @@ const apiInterceptor = (res, send) => (content) => {
     res.send = send;
     res.send(content);
 };
-const apiRateLimter = () => async (req, res, next) => {
+const apiRateLimiter = () => async (req, res, next) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress 
     const requests = await redis.incr(ip);
     if(requests === 1){
@@ -21,5 +21,5 @@ const apiRateLimter = () => async (req, res, next) => {
         res.send = apiInterceptor(res, res.send);
         next();
     }
-}
-module.exports = { apiRateLimter };
+};
+module.exports = { apiRateLimiter };
